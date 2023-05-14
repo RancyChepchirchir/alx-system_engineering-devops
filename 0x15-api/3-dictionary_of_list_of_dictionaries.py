@@ -1,31 +1,27 @@
 #!/usr/bin/python3
-"""Python script that extends script from Task 0
-and exports data in JSON formatted file
-File must have all records from all employees
-"""
-import json
-import requests
+"""Exports data in the JSON format"""
 
 if __name__ == "__main__":
-    ALL_USERS = requests.get(
-        "https://jsonplaceholder.typicode.com/users").json()
-    ALL_TASKS = requests.get(
-        "https://jsonplaceholder.typicode.com/todos").json()
-    ALL_RECORDS = {}
 
-    for user in ALL_USERS:
-        EMPLOYEE_ID = user.get("id")
-        USERNAME = user.get("username")
+    import json
+    import requests
+    import sys
 
-        for task in ALL_TASKS:
-            if (task.get("userId") == int(EMPLOYEE_ID)):
-                dict = {}
-                dict["task"] = task.get("title")
-                dict["completed"] = task.get("completed")
-                dict["username"] = USERNAME
-                ALL_TASKS.append(dict)
+    users = requests.get("https://jsonplaceholder.typicode.com/users")
+    users = users.json()
+    todos = requests.get('https://jsonplaceholder.typicode.com/todos')
+    todos = todos.json()
+    todoAll = {}
 
-        ALL_RECORDS[EMPLOYEE_ID] = ALL_TASKS
+    for user in users:
+        taskList = []
+        for task in todos:
+            if task.get('userId') == user.get('id'):
+                taskDict = {"username": user.get('username'),
+                            "task": task.get('title'),
+                            "completed": task.get('completed')}
+                taskList.append(taskDict)
+        todoAll[user.get('id')] = taskList
 
-    with open("todo_all_employees.json", 'w') as jsonfile:
-        json.dump(ALL_RECORDS, jsonfile)
+    with open('todo_all_employees.json', mode='w') as f:
+        json.dump(todoAll, f)
